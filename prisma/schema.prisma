@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Account {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  type         String    @default("WEBMAIL") // "GMAIL" | "WEBMAIL"
+  imapHost     String
+  imapPort     Int       @default(993)
+  imapUser     String
+  imapPass     String
+  imapSecure   Boolean   @default(true)
+  smtpHost     String
+  smtpPort     Int       @default(465)
+  smtpUser     String
+  smtpPass     String
+  smtpSecure   Boolean   @default(true)
+  lastSyncedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  emails       Email[]
+}
+
+model Email {
+  id          String    @id @default(cuid())
+  accountId   String
+  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  uid         Int?
+  messageId   String?
+  inReplyTo   String?
+  references  String?
+  threadId    String?
+  fromAddress String
+  fromName    String?
+  toAddress   String
+  toName      String?
+  ccAddress   String?
+  subject     String
+  snippet     String?
+  bodyText    String?
+  bodyHtml    String?
+  date        DateTime
+  folder      String    @default("INBOX") // "INBOX", "SENT"
+  isRead      Boolean   @default(false)
+  isReplied   Boolean   @default(false)
+  repliedAt   DateTime?
+  tag         String    @default("GENERAL") // "TT", "SCH", "GENERAL"
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([accountId])
+  @@index([threadId])
+  @@index([isReplied])
+  @@index([tag])
+  @@index([folder])
+  @@index([date])
+  @@index([fromAddress])
+  @@index([toAddress])
+}
